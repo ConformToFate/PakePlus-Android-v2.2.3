@@ -1,11 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus</title>
-    </head>
-    <body>
-        PakePlus
-    </body>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 关键：设置视口，禁止缩放，适配手机屏幕 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>吉凶自有天意</title>
+    <style>
+        /* 全局重置与字体 */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* 使用柔和的渐变背景 */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        /* 卡片容器 */
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+            transition: transform 0.3s ease;
+        }
+
+        h1 { 
+            font-size: 1.8rem; 
+            margin: 0 0 30px 0; 
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* 结果显示区域 */
+        .result {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 20px 0 40px 0;
+            min-height: 80px;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 结果出现时的动画 */
+        .pop-in {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px; /* 胶囊形状 */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 按钮点击态 */
+        .btn:active { transform: scale(0.96); }
+
+        /* 主按钮样式 (求签) */
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        }
+        
+        /* 次按钮样式 (抛硬币) */
+        .btn-secondary { 
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+        }
+
+        .note { 
+            font-size: 0.85rem; 
+            color: #a4b0be; 
+            margin-top: 20px; 
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔮 吉凶自有天意🔮</h1>
+    
+    <!-- 结果展示区 -->
+    <div id="result" class="result">准备</div>
+    
+    <!-- 按钮区域 -->
+    <button class="btn btn-primary" onclick="drawLot()">
+        <span>🙏</span> 求签 (吉凶)
+    </button>
+    
+    <button class="btn btn-secondary" onclick="flipCoin()">
+        <span>🪙</span> 抛硬币 (是否)
+    </button>
+    
+    <p class="note">心诚则灵，默念问题后点击</p >
+</div>
+
+<script>
+    // 核心算法：生成一个 1 到 100 的随机整数
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // 辅助函数：处理结果显示动画
+    function showResult(text) {
+        const resultDiv = document.getElementById('result');
+        // 移除动画类以重置
+        resultDiv.classList.remove('pop-in');
+        // 强制浏览器重绘 (Reflow)
+        void resultDiv.offsetWidth; 
+        // 更新文字
+        resultDiv.innerText = text;
+        // 添加动画类
+        resultDiv.classList.add('pop-in');
+    }
+
+    // 功能1：求签 (吉凶)
+    function drawLot() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerText = "摇动中...";
+        resultDiv.classList.remove('pop-in'); // 移除动画，显示中间状态
+
+        // 模拟延迟，增加仪式感
+        setTimeout(() => {
+            const num = getRandomInt(1, 100);
+            let text = "";
+            
+            if (num <= 10) {
+                text = "上上签"; // 10% 概率
+            } else if (num <= 50) {
+                text = "吉";     // 40% 概率
+            } else if (num <= 80) {
+                text = "凶";     // 40% 概率
+            } else {
+                text = "下下签";     // 10% 概率
+            }
+            showResult(text);
+        }, 500); // 稍微延长一点时间，让“摇动中”能被看清
+    }
+
+    // 功能2：抛硬币 (是/否)
+    function flipCoin() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerText = "抛投中...";
+        resultDiv.classList.remove('pop-in');
+
+        setTimeout(() => {
+            const num = getRandomInt(1, 2);
+            showResult(num === 1 ? "正面（是）" : "反面（否）");
+        }, 500);
+    }
+</script>
+
+</body>
 </html>
